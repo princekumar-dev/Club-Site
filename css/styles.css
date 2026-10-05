@@ -191,17 +191,18 @@
 }
 
 /* ==========================================================================
-   Modern Smooth Custom Interactive Cursor
+   Modern Smooth Custom Interactive Cursor (Pure Vector Pointer Finger)
    ========================================================================== */
 .custom-cursor-dot {
     position: fixed;
     top: 0;
     left: 0;
-    width: 22px;
-    height: 27px;
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(142, 216, 255, 0.92) 58%, rgba(0, 120, 212, 0.88));
-    clip-path: polygon(35% 100%, 22% 69%, 10% 55%, 7% 48%, 10% 42%, 16% 40%, 29% 49%, 28% 12%, 31% 3%, 38% 0, 45% 4%, 48% 12%, 49% 38%, 77% 34%, 84% 37%, 87% 44%, 95% 44%, 100% 50%, 99% 57%, 96% 78%, 91% 92%, 81% 100%);
-    -webkit-clip-path: polygon(35% 100%, 22% 69%, 10% 55%, 7% 48%, 10% 42%, 16% 40%, 29% 49%, 28% 12%, 31% 3%, 38% 0, 45% 4%, 48% 12%, 49% 38%, 77% 34%, 84% 37%, 87% 44%, 95% 44%, 100% 50%, 99% 57%, 96% 78%, 91% 92%, 81% 100%);
+    width: 24px;
+    height: 30px;
+    background: transparent !important;
+    background-color: transparent !important;
+    clip-path: none !important;
+    -webkit-clip-path: none !important;
     border: none !important;
     outline: none !important;
     box-shadow: none !important;
@@ -210,8 +211,22 @@
     pointer-events: none;
     z-index: 9999999;
     will-change: transform;
+    opacity: 0;
     transform: translate3d(-100px, -100px, 0) translate(-38%, 0);
     transition: opacity 0.2s ease, transform 0.08s ease-out;
+}
+
+.custom-cursor-dot svg {
+    display: block;
+    width: 24px;
+    height: 30px;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+    pointer-events: none;
+    overflow: visible;
 }
 
 .custom-cursor-dot::before,
@@ -234,15 +249,15 @@
     }
 }
 
-@media (pointer: coarse) {
+@media (pointer: coarse) and (hover: none) {
     .custom-cursor-dot, .custom-cursor-ring, .custom-cursor-label {
         display: none !important;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .custom-cursor-dot::after {
-        animation: none;
+    .custom-cursor-dot {
+        transition: none !important;
     }
 }
 

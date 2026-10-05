@@ -32,10 +32,19 @@
 </head>
 
 <body>
-    <!-- Modern Smooth Custom Cursor -->
-    <div class="custom-cursor-dot" id="cursor-dot" aria-hidden="true"></div>
-    <div class="custom-cursor-ring" id="cursor-ring" aria-hidden="true"></div>
-    <div class="custom-cursor-label" id="cursor-label" aria-hidden="true"></div>
+    <!-- Modern Smooth Custom Cursor (Pure Vector Pointer Finger) -->
+    <div class="custom-cursor-dot" id="cursor-dot" aria-hidden="true">
+        <svg width="24" height="30" viewBox="0 0 24 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="cursorHandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#FFFFFF" />
+                    <stop offset="52%" stop-color="#8ED8FF" />
+                    <stop offset="100%" stop-color="#0078D4" />
+                </linearGradient>
+            </defs>
+            <polygon points="8.40,29.50 5.28,20.36 2.40,16.23 1.68,14.16 2.40,12.39 3.84,11.80 6.96,14.46 6.72,3.54 7.44,0.89 9.12,0.00 10.80,1.18 11.52,3.54 11.76,11.21 18.48,10.03 20.16,10.91 20.88,12.98 22.80,12.98 24.00,14.75 23.76,16.82 23.04,23.01 21.84,27.14 19.44,29.50" fill="url(#cursorHandGrad)" stroke="url(#cursorHandGrad)" stroke-width="0.8" stroke-linejoin="round" stroke-linecap="round" />
+        </svg>
+    </div>
 
     <!-- Microsoft AI Club preloader -->
     <div id="site-preloader" class="site-preloader" aria-hidden="true">

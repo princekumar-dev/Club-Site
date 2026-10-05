@@ -176,26 +176,28 @@ function initThemeToggle() {
 // --------------------------------------------------------------------------
 function initCustomCursor() {
     const dot = document.getElementById('cursor-dot');
-    const ring = document.getElementById('cursor-ring');
-    const label = document.getElementById('cursor-label');
-    if (!dot || !ring || !label) return;
+    if (!dot) return;
 
-    if (ring) ring.style.display = 'none';
-    if (label) label.style.display = 'none';
-
-    if (window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window || navigator.maxTouchPoints > 0) return;
+    if (window.matchMedia('(pointer: coarse)').matches && !window.matchMedia('(pointer: fine)').matches) return;
 
     let isVisible = false;
     let isPressed = false;
+    let currentX = -100;
+    let currentY = -100;
+
+    function updateCursorTransform() {
+        const scale = isPressed ? 'scale(0.92)' : 'scale(1)';
+        dot.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) translate(-38%, 0) ${scale}`;
+    }
 
     window.addEventListener('mousemove', (e) => {
+        currentX = e.clientX;
+        currentY = e.clientY;
         if (!isVisible) {
             dot.style.opacity = '1';
             isVisible = true;
         }
-
-        const scale = isPressed ? 'scale(0.90)' : 'scale(1)';
-        dot.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-38%, 0) ${scale}`;
+        updateCursorTransform();
     }, { passive: true });
 
     document.addEventListener('mouseleave', () => {
@@ -210,10 +212,12 @@ function initCustomCursor() {
 
     window.addEventListener('mousedown', () => {
         isPressed = true;
+        updateCursorTransform();
     });
 
     window.addEventListener('mouseup', () => {
         isPressed = false;
+        updateCursorTransform();
     });
 }
 
