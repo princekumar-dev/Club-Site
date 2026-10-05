@@ -65,31 +65,40 @@ function initThemeToggle() {
     }
 
     function transitionTheme(theme) {
-        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (prefersReducedMotion) {
+        // 1. Mobile & Touch: instantaneous theme switch with zero lag and NO overlays
+        const isMobileOrTouch = window.innerWidth <= 820 || 
+                                (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || 
+                                ('ontouchstart' in window) || 
+                                (navigator.maxTouchPoints > 0);
+        const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (isMobileOrTouch || prefersReducedMotion) {
             applyTheme(theme);
+            if (toggleBtn) {
+                toggleBtn.classList.add('is-transitioning');
+                setTimeout(() => toggleBtn.classList.remove('is-transitioning'), 350);
+            }
             return;
         }
 
-        const rect = toggleBtn ? toggleBtn.getBoundingClientRect() : {
-            left: window.innerWidth / 2,
-            top: window.innerHeight / 2,
-            width: 0,
-            height: 0
-        };
-        const x = rect.left + rect.width / 2;
-        const y = rect.top + rect.height / 2;
-
-        const endRadius = Math.hypot(
-            Math.max(x, window.innerWidth - x),
-            Math.max(y, window.innerHeight - y)
-        );
-
-        toggleBtn?.classList.add('is-transitioning');
-        setTimeout(() => toggleBtn?.classList.remove('is-transitioning'), 1350);
-
-        // Native View Transitions API (Modern Chromium browsers: Chrome, Edge, etc.)
+        // 2. Desktop: Snappy View Transitions API (Chromium / Edge / modern browsers)
         if (document.startViewTransition) {
+            const rect = toggleBtn ? toggleBtn.getBoundingClientRect() : {
+                left: window.innerWidth / 2,
+                top: window.innerHeight / 2,
+                width: 0,
+                height: 0
+            };
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2;
+            const endRadius = Math.hypot(
+                Math.max(x, window.innerWidth - x),
+                Math.max(y, window.innerHeight - y)
+            );
+
+            toggleBtn?.classList.add('is-transitioning');
+            setTimeout(() => toggleBtn?.classList.remove('is-transitioning'), 400);
+
             const transition = document.startViewTransition(() => {
                 applyTheme(theme);
             });
@@ -103,34 +112,19 @@ function initThemeToggle() {
                         ]
                     },
                     {
-                        duration: 1250,
-                        easing: 'cubic-bezier(0.35, 0, 0.25, 1)',
+                        duration: 380, // Snappy 60fps ripple, no sluggish delay
+                        easing: 'cubic-bezier(0.2, 0, 0, 1)',
                         pseudoElement: '::view-transition-new(root)'
                     }
                 );
+            }).catch(() => {
+                applyTheme(theme);
             });
             return;
         }
 
-        // Fallback for browsers without View Transitions
-        if (document.querySelector('.theme-transition')) return;
-        const transition = document.createElement('div');
-        transition.className = 'theme-transition';
-        transition.dataset.themeTarget = theme;
-        transition.style.setProperty('--theme-x', `${x}px`);
-        transition.style.setProperty('--theme-y', `${y}px`);
-        document.body.appendChild(transition);
-
+        // 3. Desktop without startViewTransition: direct clean switch (no DOM overlay divs)
         applyTheme(theme);
-
-        const animation = transition.animate(
-            [
-                { clipPath: `circle(0px at ${x}px ${y}px)`, opacity: 0.85 },
-                { clipPath: `circle(${endRadius}px at ${x}px ${y}px)`, opacity: 0 }
-            ],
-            { duration: 1250, easing: 'cubic-bezier(0.35, 0, 0.25, 1)', fill: 'forwards' }
-        );
-        animation.finished.then(() => transition.remove()).catch(() => transition.remove());
     }
 }
 
@@ -143,7 +137,7 @@ function initCustomCursor() {
     const label = document.getElementById('cursor-label');
     if (!dot || !ring || !label) return;
 
-    if (window.matchMedia('(pointer: coarse)').matches) return;
+    if (window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window || navigator.maxTouchPoints > 0) return;
 
     let mouseX = window.innerWidth / 2;
     let mouseY = window.innerHeight / 2;
