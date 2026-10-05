@@ -31,6 +31,8 @@ function initThemeToggle() {
     const savedTheme = localStorage.getItem('msc_theme');
     let currentTheme = savedTheme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 
+    let isThemeTransitioning = false;
+
     function applyTheme(theme) {
         root.setAttribute('data-theme', theme);
         localStorage.setItem('msc_theme', theme);
@@ -51,6 +53,7 @@ function initThemeToggle() {
 
     if (toggleBtn) {
         toggleBtn.addEventListener('click', () => {
+            if (isThemeTransitioning) return;
             const activeTheme = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
             transitionTheme(activeTheme);
         });
@@ -64,67 +67,107 @@ function initThemeToggle() {
         });
     }
 
+    function createSpreadFallback(x, y, radius, targetTheme) {
+        const ripple = document.createElement('div');
+        ripple.className = 'theme-spread-fallback';
+        ripple.style.left = `${x}px`;
+        ripple.style.top = `${y}px`;
+        ripple.style.width = `${radius * 2}px`;
+        ripple.style.height = `${radius * 2}px`;
+        ripple.setAttribute('data-target-theme', targetTheme);
+        document.body.appendChild(ripple);
+
+        const anim = ripple.animate([
+            { transform: 'translate(-50%, -50%) scale(0)', opacity: 0.8 },
+            { transform: 'translate(-50%, -50%) scale(1)', opacity: 0 }
+        ], {
+            duration: 480,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+        });
+
+        const cleanup = () => {
+            if (ripple.parentNode) ripple.parentNode.removeChild(ripple);
+        };
+        anim.addEventListener('finish', cleanup);
+        anim.addEventListener('cancel', cleanup);
+        setTimeout(cleanup, 520);
+    }
+
     function transitionTheme(theme) {
-        // 1. Mobile & Touch: instantaneous theme switch with zero lag and NO overlays
-        const isMobileOrTouch = window.innerWidth <= 820 || 
-                                (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || 
-                                ('ontouchstart' in window) || 
-                                (navigator.maxTouchPoints > 0);
         const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        if (isMobileOrTouch || prefersReducedMotion) {
+        if (prefersReducedMotion) {
             applyTheme(theme);
-            if (toggleBtn) {
-                toggleBtn.classList.add('is-transitioning');
-                setTimeout(() => toggleBtn.classList.remove('is-transitioning'), 350);
-            }
             return;
         }
 
-        // 2. Desktop: Snappy View Transitions API (Chromium / Edge / modern browsers)
+        isThemeTransitioning = true;
+        toggleBtn?.classList.remove('is-transitioning');
+        void toggleBtn?.offsetWidth;
+        toggleBtn?.classList.add('is-transitioning');
+        window.setTimeout(() => {
+            toggleBtn?.classList.remove('is-transitioning');
+            isThemeTransitioning = false;
+        }, 520);
+
+        const rect = toggleBtn ? toggleBtn.getBoundingClientRect() : {
+            left: window.innerWidth / 2,
+            top: window.innerHeight / 2,
+            width: 0,
+            height: 0
+        };
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+        const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+        const endRadius = Math.hypot(
+            Math.max(x, vw - x),
+            Math.max(y, vh - y)
+        );
+
+        root.style.setProperty('--theme-spread-x', `${x}px`);
+        root.style.setProperty('--theme-spread-y', `${y}px`);
+        root.style.setProperty('--theme-spread-radius', `${endRadius}px`);
+
         if (document.startViewTransition) {
-            const rect = toggleBtn ? toggleBtn.getBoundingClientRect() : {
-                left: window.innerWidth / 2,
-                top: window.innerHeight / 2,
-                width: 0,
-                height: 0
-            };
-            const x = rect.left + rect.width / 2;
-            const y = rect.top + rect.height / 2;
-            const endRadius = Math.hypot(
-                Math.max(x, window.innerWidth - x),
-                Math.max(y, window.innerHeight - y)
-            );
-
-            toggleBtn?.classList.add('is-transitioning');
-            setTimeout(() => toggleBtn?.classList.remove('is-transitioning'), 400);
-
             const transition = document.startViewTransition(() => {
                 applyTheme(theme);
             });
 
             transition.ready.then(() => {
-                document.documentElement.animate(
-                    {
-                        clipPath: [
-                            `circle(0px at ${x}px ${y}px)`,
-                            `circle(${endRadius}px at ${x}px ${y}px)`
-                        ]
-                    },
-                    {
-                        duration: 380, // Snappy 60fps ripple, no sluggish delay
-                        easing: 'cubic-bezier(0.2, 0, 0, 1)',
-                        pseudoElement: '::view-transition-new(root)'
-                    }
-                );
+                try {
+                    document.documentElement.animate(
+                        {
+                            clipPath: [
+                                `circle(0px at ${x}px ${y}px)`,
+                                `circle(${endRadius}px at ${x}px ${y}px)`
+                            ]
+                        },
+                        {
+                            duration: 500,
+                            easing: 'cubic-bezier(0.2, 0, 0, 1)',
+                            pseudoElement: '::view-transition-new(root)'
+                        }
+                    );
+                } catch (e) {
+                    // Supported by CSS animation ::view-transition-new(root)
+                }
             }).catch(() => {
                 applyTheme(theme);
+            });
+
+            transition.finished.finally(() => {
+                isThemeTransitioning = false;
             });
             return;
         }
 
-        // 3. Desktop without startViewTransition: direct clean switch (no DOM overlay divs)
+        // Smooth circular spread fallback for browsers without native View Transitions API
+        createSpreadFallback(x, y, endRadius, theme);
         applyTheme(theme);
+        setTimeout(() => {
+            isThemeTransitioning = false;
+        }, 500);
     }
 }
 
@@ -1731,3 +1774,29 @@ function initFigmaToolbar() {
         }, 2200);
     }
 }
+
+// --------------------------------------------------------------------------
+// 10. Subtle Hero Parallax
+// --------------------------------------------------------------------------
+function initParallax() {
+    const hero = document.getElementById('home');
+    const canvas = document.getElementById('neural-canvas');
+    if (!hero || !canvas) return;
+
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                const scrolled = window.pageYOffset || document.documentElement.scrollTop;
+                if (scrolled < hero.offsetHeight) {
+                    canvas.style.transform = `translate3d(0, ${scrolled * 0.22}px, 0)`;
+                }
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }, { passive: true });
+}
+
