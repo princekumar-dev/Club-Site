@@ -180,261 +180,41 @@ function initCustomCursor() {
     const label = document.getElementById('cursor-label');
     if (!dot || !ring || !label) return;
 
+    if (ring) ring.style.display = 'none';
+    if (label) label.style.display = 'none';
+
     if (window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window || navigator.maxTouchPoints > 0) return;
 
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
-    let ringX = mouseX;
-    let ringY = mouseY;
     let isVisible = false;
+    let isPressed = false;
 
     window.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-
         if (!isVisible) {
             dot.style.opacity = '1';
-            ring.style.opacity = '1';
             isVisible = true;
         }
 
-        dot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%) rotate(-14deg)`;
-        label.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(14px, 14px)`;
+        const scale = isPressed ? 'scale(0.90)' : 'scale(1)';
+        dot.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-38%, 0) ${scale}`;
     }, { passive: true });
 
     document.addEventListener('mouseleave', () => {
         dot.style.opacity = '0';
-        ring.style.opacity = '0';
-        label.style.opacity = '0';
-        label.classList.remove('is-visible');
         isVisible = false;
     });
 
     document.addEventListener('mouseenter', () => {
         dot.style.opacity = '1';
-        ring.style.opacity = '1';
         isVisible = true;
     });
 
-    // 120 FPS high-refresh rate trailing lerp (GPU translate3d)
-    function renderCursor() {
-        ringX += (mouseX - ringX) * 0.28;
-        ringY += (mouseY - ringY) * 0.28;
-
-        ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%)`;
-
-        requestAnimationFrame(renderCursor);
-    }
-    requestAnimationFrame(renderCursor);
-
-    // Dynamic Contextual Hover States & Natural Interactive Feedback
-    const interactiveSelectors = 'a, button, input, select, textarea, .objective-card, .event-poster-card, .event-card, .about-poster-card, .vm-editorial-card, .pillar-card, .filter-chip, .gallery-card, .photo-tile, .gallery-masonry-card, .team-roster-pill, .lightbox-trigger, .theme-toggle, .nav-brand, .figma-tool-btn, .social-icon, .social-link, [data-lightbox], [data-cursor]';
-
-    function getContextualMessage(el) {
-        if (!el) return '';
-
-        // Explicit override via data-cursor attribute
-        const explicit = el.getAttribute('data-cursor') || el.closest('[data-cursor]')?.getAttribute('data-cursor');
-        if (explicit) return explicit;
-
-        // 1. Theme toggle button
-        if (el.closest('#theme-toggle, .theme-toggle')) {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            return isDark ? 'SWITCH TO LIGHT ☀' : 'SWITCH TO DARK ☾';
-        }
-
-        // 2. Navigation logo
-        if (el.closest('.nav-brand')) {
-            return 'TOP OF PAGE ↑';
-        }
-
-        // 3. Navigation links
-        const navLink = el.closest('.nav-link');
-        if (navLink) {
-            const text = navLink.textContent.trim().toUpperCase();
-            return `JUMP TO ${text} ↓`;
-        }
-
-        // 4. Form inputs, select, and textarea
-        if (el.matches('input[type="email"]')) return 'ENTER EMAIL ✉';
-        if (el.matches('input[type="text"]')) return 'TYPE YOUR NAME ✎';
-        if (el.matches('select')) return 'CHOOSE DOMAIN ▾';
-        if (el.matches('textarea')) return 'WRITE MESSAGE ✎';
-        if (el.closest('.contact-submit, button[type="submit"]')) return 'SEND APPLICATION ↗';
-
-        // 5. Category Filter Chips (Extract clean title without embedded count span)
-        const filterChip = el.closest('.filter-chip');
-        if (filterChip) {
-            const clone = filterChip.cloneNode(true);
-            const countSpan = clone.querySelector('span');
-            if (countSpan) countSpan.remove();
-            const name = clone.textContent.trim().toUpperCase();
-            if (filterChip.classList.contains('active')) return `ACTIVE: ${name} ✓`;
-            return `FILTER: ${name}`;
-        }
-
-        // 6. Gallery items & lightbox
-        const galleryItem = el.closest('.gallery-card, .photo-tile, .gallery-masonry-card, [data-lightbox], .lightbox-trigger');
-        if (galleryItem) {
-            const badge = galleryItem.querySelector('.photo-event-badge')?.textContent.trim();
-            if (badge) return `VIEW: ${badge} ⊕`;
-            return 'EXPAND PHOTO ⊕';
-        }
-        if (el.closest('.lightbox-close, .modal-close')) return 'CLOSE ✕';
-        if (el.closest('.lightbox-next')) return 'NEXT →';
-        if (el.closest('.lightbox-prev')) return 'PREV ←';
-
-        // 7. Event action buttons & cards
-        if (el.closest('.view-gallery-btn') || el.matches('a[href="#gallery"]')) {
-            return 'EVENT GLIMPSE ✦';
-        }
-        const eventCard = el.closest('.event-poster-card, .event-card');
-        if (eventCard) {
-            const titleEl = eventCard.querySelector('.poster-title, h3');
-            const title = titleEl ? titleEl.textContent.trim().slice(0, 20).toUpperCase() : 'EVENT';
-            return `EXPLORE: ${title}`;
-        }
-
-        // 8. 9 Club Pillars
-        const objCard = el.closest('.objective-card');
-        if (objCard) {
-            const num = objCard.querySelector('.obj-num')?.textContent.trim() || '';
-            const title = objCard.querySelector('.obj-title')?.textContent.trim() || '';
-            return num ? `PILLAR ${num}: ${title.slice(0, 16).toUpperCase()}` : 'DISCOVER PILLAR';
-        }
-
-        // 9. About Color-Block Cards
-        const aboutCard = el.closest('.about-poster-card');
-        if (aboutCard) {
-            const title = aboutCard.querySelector('h3')?.textContent.trim().slice(0, 18).toUpperCase() || 'EXPLORE';
-            return `${title} ✦`;
-        }
-
-        // 10. Vision & Mission Cards
-        if (el.closest('.vision-editorial')) return 'OUR VISION ✦';
-        if (el.closest('.mission-editorial')) return 'OUR MISSION ✦';
-
-        // 11. Buttons (Join, Explore, Actions)
-        if (el.closest('.btn-pill-solid, .btn-primary')) {
-            const txt = el.textContent.trim().toUpperCase();
-            if (txt.includes('JOIN')) return 'JOIN CLUB ✦';
-            if (txt.includes('EXPLORE')) return 'EXPLORE CLUB ↗';
-            return 'DISCOVER ✦';
-        }
-        if (el.closest('.btn-pill-ghost')) {
-            return 'SCROLL DOWN ↓';
-        }
-
-        // 12. Social / external links
-        if (el.closest('.social-icon, .social-link') || (el.tagName === 'A' && el.getAttribute('target') === '_blank')) {
-            return 'CONNECT ↗';
-        }
-
-        // 13. Figma toolbar
-        const figmaBtn = el.closest('.figma-tool-btn');
-        if (figmaBtn) {
-            return (figmaBtn.getAttribute('title') || 'TOOL').toUpperCase();
-        }
-
-        // 14. Team & Leadership pillars
-        if (el.closest('.team-roster-pill, #open-team-roster')) {
-            return 'MEET OUR BRAINS ✦';
-        }
-        if (el.closest('.team .pillar-card')) {
-            return 'CLUB INITIATIVE ✦';
-        }
-
-        // 15. Default anchor / button interactions
-        if (el.tagName === 'A') {
-            const href = el.getAttribute('href') || '';
-            if (href.startsWith('#')) return 'NAVIGATE ↓';
-            return 'VISIT ↗';
-        }
-        if (el.tagName === 'BUTTON') return 'SELECT ✦';
-
-        return 'INTERACT ✦';
-    }
-
-    function hideCursorLabel() {
-        label.classList.remove('is-visible');
-        ring.classList.remove('cursor-hover');
-        label.textContent = '';
-    }
-
-    function updateCursorContext(target) {
-        if (!target) {
-            hideCursorLabel();
-            return;
-        }
-
-        const interactive = target.closest ? target.closest(interactiveSelectors) : null;
-        if (interactive) {
-            const msg = getContextualMessage(interactive);
-            if (msg) {
-                label.textContent = msg;
-                label.classList.add('is-visible');
-                ring.classList.add('cursor-hover');
-            } else {
-                hideCursorLabel();
-            }
-        } else {
-            hideCursorLabel();
-        }
-    }
-
-    window.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-
-        if (!isVisible) {
-            dot.style.opacity = '1';
-            ring.style.opacity = '1';
-            isVisible = true;
-        }
-
-        dot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
-        label.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(14px, 14px)`;
-
-        // Instantaneous, frame-by-frame contextual inspection
-        updateCursorContext(e.target);
-    }, { passive: true });
-
-    // Scrolling immediately clears contextual badge (elements shifted away)
-    window.addEventListener('scroll', () => {
-        hideCursorLabel();
-    }, { passive: true });
-
-    document.addEventListener('mouseleave', () => {
-        dot.style.opacity = '0';
-        ring.style.opacity = '0';
-        hideCursorLabel();
-        isVisible = false;
+    window.addEventListener('mousedown', () => {
+        isPressed = true;
     });
 
-    document.addEventListener('mouseenter', () => {
-        dot.style.opacity = '1';
-        ring.style.opacity = '1';
-        isVisible = true;
+    window.addEventListener('mouseup', () => {
+        isPressed = false;
     });
-
-    // Re-evaluate on click or filter selection
-    window.addEventListener('click', (e) => {
-        updateCursorContext(e.target);
-    });
-
-    // 120 FPS high-refresh rate trailing lerp (GPU translate3d)
-    function renderCursor() {
-        ringX += (mouseX - ringX) * 0.28;
-        ringY += (mouseY - ringY) * 0.28;
-
-        ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%)`;
-
-        requestAnimationFrame(renderCursor);
-    }
-    requestAnimationFrame(renderCursor);
-
-    window.addEventListener('mousedown', () => ring.classList.add('cursor-active'));
-    window.addEventListener('mouseup', () => ring.classList.remove('cursor-active'));
 }
 
 // --------------------------------------------------------------------------
