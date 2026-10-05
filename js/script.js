@@ -78,11 +78,11 @@ function initThemeToggle() {
         document.body.appendChild(ripple);
 
         const anim = ripple.animate([
-            { transform: 'translate(-50%, -50%) scale(0)', opacity: 0.8 },
-            { transform: 'translate(-50%, -50%) scale(1)', opacity: 0 }
+            { transform: 'translate(-50%, -50%) scale(0)', opacity: 1 },
+            { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 }
         ], {
-            duration: 480,
-            easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+            duration: 1100,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
         });
 
         const cleanup = () => {
@@ -90,7 +90,7 @@ function initThemeToggle() {
         };
         anim.addEventListener('finish', cleanup);
         anim.addEventListener('cancel', cleanup);
-        setTimeout(cleanup, 520);
+        setTimeout(cleanup, 1150);
     }
 
     function transitionTheme(theme) {
@@ -108,7 +108,7 @@ function initThemeToggle() {
         window.setTimeout(() => {
             toggleBtn?.classList.remove('is-transitioning');
             isThemeTransitioning = false;
-        }, 520);
+        }, 1100);
 
         const rect = toggleBtn ? toggleBtn.getBoundingClientRect() : {
             left: window.innerWidth / 2,
@@ -144,8 +144,8 @@ function initThemeToggle() {
                             ]
                         },
                         {
-                            duration: 500,
-                            easing: 'cubic-bezier(0.2, 0, 0, 1)',
+                            duration: 1100,
+                            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
                             pseudoElement: '::view-transition-new(root)'
                         }
                     );
@@ -167,7 +167,7 @@ function initThemeToggle() {
         applyTheme(theme);
         setTimeout(() => {
             isThemeTransitioning = false;
-        }, 500);
+        }, 1100);
     }
 }
 
@@ -198,7 +198,7 @@ function initCustomCursor() {
             isVisible = true;
         }
 
-        dot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
+        dot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%) rotate(-14deg)`;
         label.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(14px, 14px)`;
     }, { passive: true });
 
