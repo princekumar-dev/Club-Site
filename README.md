@@ -1,100 +1,117 @@
-# Club Website - Premium HTML/CSS Template
+<div align="center">
 
-A modern, premium club website built with HTML5 and CSS3 featuring:
-- Parallax scrolling effects
-- Smooth animations and transitions
-- Responsive design for all devices
-- Clean, minimal aesthetic
-- Interactive elements
+# Microsoft AI Club — Website
 
-## Features
+### Innovate · Analyze · Connect
 
-- **Hero Section** with parallax background and call-to-action
-- **About Us** section with image and text
-- **Events Grid** showcasing upcoming events with hover effects
-- **Photo Gallery** with hover overlays
-- **Contact Form** with validation styling
-- **Footer** with social media links
-- **Responsive Design** - works on mobile, tablet, and desktop
-- **CSS Animations** - fade-in effects on scroll
-- **Premium Styling** - gradients, shadows, and modern color scheme
+[![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)](https://developer.mozilla.org/docs/Web/HTML)
+[![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)](https://developer.mozilla.org/docs/Web/CSS)
+[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)](https://developer.mozilla.org/docs/Web/JavaScript)
+[![Vercel](https://img.shields.io/badge/Deployed-Vercel-000000?style=flat-square&logo=vercel&logoColor=white)](https://club-seven-sigma.vercel.app)
+[![License](https://img.shields.io/badge/License-Open_to_use-green?style=flat-square)](#license)
 
-## File Structure
+**[🔗 Live Site](https://club-seven-sigma.vercel.app)**
+
+</div>
+
+---
+
+## 📖 About
+
+The official website of the **Microsoft AI Club** — a student-led community from the **Department of Artificial Intelligence & Data Science** exploring Artificial Intelligence, Data Science, and Microsoft technologies.
+
+This is a **hand-crafted static site**: pure HTML5, CSS3, and vanilla JavaScript — no frameworks, no build step, no dependencies to install. Open it, and it runs.
+
+## ✨ Features
+
+**🧭 Sections**
+Home · About · Vision · Objectives · Events · Gallery · Team · Contact
+
+**🎬 Interactive polish**
+- **Animated preloader** with live percentage counter
+- **Dark / light theme toggle** with a view-transition ripple animation — no white flash on load (theme is applied before first paint via an inline script and persisted in `localStorage`)
+- **Custom cursor** — smooth SVG pointer that follows the mouse
+- **Neural-network canvas** background animation in the hero
+- **Photo gallery with lightbox** — captions, category tags, and prev/next counter
+- **Team roster modal** — 9 leadership members with an animated spark canvas
+- **Announcement ribbon** for club-wide notices
+- **Scroll-reveal animations** and hover effects on event cards
+- **Responsive navigation** with an animated pill slider and mobile hamburger menu
+- **Validated contact form**
+
+**♿ Accessible & fast**
+- `prefers-reduced-motion` respected throughout
+- Semantic markup, keyboard-friendly navigation
+- Static hosting — loads instantly on any CDN
+
+## 📁 File Structure
 
 ```
-CLUB SITE/
-├── index.html          # Main HTML file
+Club-Site/
+├── index.html          # Single-page site (all sections)
 ├── css/
-│   └── styles.css      # All styling including parallax effects
+│   └── styles.css      # Full styling, themes, animations
 ├── js/
-│   └── script.js       # Interactive elements and animations
-├── images/             # Place for your images (add your own)
-└── README.md           # This file
+│   └── script.js       # Theme, cursor, canvas, lightbox, nav logic
+├── images/             # Club logo, event photos, leadership portraits
+│   └── leadership/     # Team member photos
+├── favicon.ico
+└── README.md
 ```
 
-## Setup Instructions
+## 🚀 Getting Started
 
-1. **Replace placeholder images**:
-   - Add your own images to the `images/` folder
-   - Update the `src` attributes in `index.html` to point to your images
-   - Key images to replace:
-     - Hero background (currently using Unsplash placeholder)
-     - About section image (`images/about.jpg`)
-     - Gallery images (`images/gallery1.jpg` through `images/gallery4.jpg`)
+No install, no build — it's static.
 
-2. **Customize content**:
-   - Edit text in `index.html` to match your club's information
-   - Update club name, event details, contact information, etc.
-   - Modify colors in `css/styles.css` if needed (look for `--primary-color` variables or search for color values)
+```bash
+# 1. Clone the repo
+git clone https://github.com/princekumar-dev/Club-Site.git
+cd Club-Site
 
-3. **Customize styling** (optional):
-   - The main color scheme uses gradients from purple to blue (`#6a11cb` to `#2575fc`)
-   - Secondary colors use teal/green (`#11998e` to `#38ef7d`)
-   - To change colors, update the hex values in `styles.css`
-
-4. **Test locally**:
-   - Open `index.html` in your web browser to view the site
-   - For best results, use a local server (like Live Server in VS Code) to avoid CORS issues
-
-## Parallax Effect
-
-The parallax effect is implemented in the hero section using:
-```css
-background-attachment: fixed;
+# 2. Open it
+#    Either just double-click index.html,
+#    or serve it locally (recommended, avoids file:// quirks):
+npx serve .
 ```
-This creates a smooth parallax scrolling effect where the background moves at a different speed than the foreground content.
 
-## Customization Tips
+Then visit `http://localhost:3000`.
 
-### Colors
-- Primary gradient: `#6a11cb` to `#2575fc` (purple to blue)
-- Secondary gradient: `#11998e` to `#38ef7d` (teal to green)
-- To change: Search for these hex values in `styles.css` and replace them
+## 🎨 Customization
 
-### Fonts
-- Uses system fonts: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
-- To use Google Fonts: Add link in `<head>` and update `font-family` in CSS
+| What | Where |
+|------|-------|
+| Club text, events, team members | `index.html` |
+| Colors & theme variables | `css/styles.css` (search for the gradient hex values) |
+| Animations & interactions | `js/script.js` |
+| Images (logo, events, team) | `images/` |
 
-### Images
-- All images should be optimized for web use
-- Recommended sizes:
-  - Hero background: 1920x1080px or larger
-  - About image: 800x600px
-  - Gallery images: 800x600px (will be cropped to 280px height in grid)
+- **Primary gradient:** `#6a11cb` → `#2575fc` (purple → blue)
+- **Secondary gradient:** `#11998e` → `#38ef7d` (teal → green)
+- **Theme tokens:** `data-theme="dark"` / `data-theme="light"` on `<html>`
 
-## Browser Support
+## ▲ Deployment
 
-This website works in all modern browsers:
-- Chrome, Firefox, Safari, Edge
-- Mobile browsers (iOS Safari, Android Chrome)
-- Graceful degradation in older browsers
+Live at **[club-seven-sigma.vercel.app](https://club-seven-sigma.vercel.app)** via **Vercel**.
 
-## Credits
+To deploy your own copy: push to GitHub → import the repo on [vercel.com](https://vercel.com) → done (framework auto-detected as *Other*, zero config). Netlify, GitHub Pages, or any static host works the same way.
 
-- Icons: Font Awesome 6 ([fontawesome.com](https://fontawesome.com))
-- Background image placeholder: Unsplash ([unsplash.com](https://unsplash.com))
-- Design inspiration: Modern web design trends
+## 🌍 Browser Support
 
-## License
+Chrome · Firefox · Safari · Edge — desktop & mobile. Graceful degradation in older browsers.
 
-Feel free to use and modify this template for your club or personal projects.
+## 📄 License
+
+Free to use and modify for your club or personal projects.
+
+## 🙏 Credits
+
+- **Icons:** [Font Awesome 6](https://fontawesome.com)
+- **Club identity:** Microsoft AI Club, Department of AI & Data Science
+
+---
+
+<div align="center">
+
+Built with ❤️ by the **Microsoft AI Club** team
+
+</div>
